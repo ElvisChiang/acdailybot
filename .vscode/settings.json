@@ -1,0 +1,14 @@
+{
+  "go.testFlags": ["-v", "-count", "1"],
+  "go.alternateTools": {
+    "go-langserver": "gopls"
+  },
+  "go.languageServerExperimentalFeatures": {
+    "format": true,
+    "autoComplete": true
+  },
+  "go.useLanguageServer": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true
+  }
+}
