@@ -9,3 +9,5 @@ run:
 	@echo "source code: ${SRC}"
 	@go run ${SRC}
 
+dump:
+	@echo ".dump highlight" | sqlite3 acbot.db

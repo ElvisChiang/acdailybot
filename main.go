@@ -60,18 +60,19 @@ func main() {
 			adminMark,
 			update.Message.Text)
 
-		result, err := Command(db, update.Message.Chat.ID, update.Message.From.UserName, talker.IsAdministrator(), update.Message.Text)
+		result, err := Command(db, update.Message.Chat.ID, update.Message.From.UserName, talker.IsAdministrator() || talker.IsCreator(), update.Message.Text)
 
 		if err != nil {
 			log.Printf("failed to process [%s] `%s`: `%s`", update.Message.From.UserName, update.Message.Text, err.Error())
 		}
 
 		if result == "" {
-			return
+			result = "ok"
 		}
 
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, result)
 		msg.ParseMode = "Markdown"
+		msg.DisableWebPagePreview = true
 		msg.ReplyToMessageID = update.Message.MessageID
 		bot.Send(msg)
 	}

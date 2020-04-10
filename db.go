@@ -19,7 +19,7 @@ func resetDB() (err error) {
 	}
 	defer db.Close()
 	template := `
-	create table %s (channelid integer not null primary key, name text, message text);
+	create table %s (id integer not null primary key, channelid integer, name text, message text);
 	delete from %s;
 	`
 	sqlStmt := fmt.Sprintf(template, getDBTableName(), getDBTableName())
@@ -35,6 +35,12 @@ func resetDB() (err error) {
 
 func initDB(isReset bool) (db *sql.DB, err error) {
 	err = nil
+
+	_, err = os.Stat(getDBFilename())
+	if os.IsNotExist(err) {
+		log.Println("DB doesn't exist, init it")
+		isReset = true
+	}
 
 	if isReset {
 		ret := resetDB()
@@ -53,19 +59,41 @@ func initDB(isReset bool) (db *sql.DB, err error) {
 	return
 }
 
-func removeHLEntry(channel string, who string) (err error) {
+func removeHLEntry(db *sql.DB, channelid int64, who string) (err error) {
 	err = nil
-	// TODO: remove entry in db
+
+	template := `
+	DELETE from highlight where channelid = %d and name = "%s";
+	`
+	sqlStmt := fmt.Sprintf(template, channelid, who)
+
+	_, err = db.Exec(sqlStmt)
+	if err != nil {
+		log.Printf("%q: %s\n", err, sqlStmt)
+		return
+	}
+
 	return
 }
 
-func insertHLEntry(channel string, who string, message string) (err error) {
+func insertHLEntry(db *sql.DB, channelid int64, who string, message string) (err error) {
 	err = nil
-	// TODO: add entry in db
+
+	template := `
+	INSERT INTO highlight(channelid, name, message) VALUES (%d, "%s", "%s");
+	`
+	sqlStmt := fmt.Sprintf(template, channelid, who, message)
+
+	_, err = db.Exec(sqlStmt)
+	if err != nil {
+		log.Printf("%q: %s\n", err, sqlStmt)
+		return
+	}
+
 	return
 }
 
-func queryHLEntry(channel string, who string) (message string, err error) {
+func queryHLEntry(db *sql.DB, channelid int64, who string) (message string, err error) {
 	err = nil
 	message = ""
 	// TOOD: query entry in db
@@ -73,18 +101,70 @@ func queryHLEntry(channel string, who string) (message string, err error) {
 	return
 }
 
-func replaceHLEntry(channel string, who string) (err error) {
+func replaceHLEntry(db *sql.DB, channelid int64, who string, message string) (err error) {
 	err = nil
-	removeHLEntry(channel, who) // ignore
 
-	// TODO: insert
+	err = removeHLEntry(db, channelid, who)
+	if err != nil {
+		return
+	}
+
+	err = insertHLEntry(db, channelid, who, message)
+	if err != nil {
+		return
+	}
+
 	return
 }
 
-func queryAllHLEntry(channel string) (message string, err error) {
+func queryAllHLEntry(db *sql.DB, channelid int64) (message string, err error) {
 	err = nil
 	message = ""
 
-	// TODO: query all
+	template := `
+	SELECT name, message from highlight where channelid = %d
+	`
+	sqlStmt := fmt.Sprintf(template, channelid)
+
+	rows, err := db.Query(sqlStmt)
+	if err != nil {
+		log.Printf("%q: %s\n", err, sqlStmt)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var name string
+		var msg string
+		err = rows.Scan(&name, &msg)
+		if err != nil {
+			log.Printf(err.Error())
+			continue
+		}
+		message = fmt.Sprintf("%s%s: %s\n", message, name, msg)
+		fmt.Println(name, msg)
+	}
+	err = rows.Err()
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
+
+	return
+}
+
+func resetAllHLEntry(db *sql.DB, channelid int64) (err error) {
+	err = nil
+
+	template := `
+	DELETE from %s where channelid = %d;
+	`
+	sqlStmt := fmt.Sprintf(template, getDBTableName(), channelid)
+
+	_, err = db.Exec(sqlStmt)
+	if err != nil {
+		log.Printf("%q: %s\n", err, sqlStmt)
+		return
+	}
+
 	return
 }
