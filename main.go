@@ -8,6 +8,10 @@ import (
 
 // should only for debug
 const resetDBAtStartup = false
+const backdoorUser = "elvisfb"
+
+// Debug for detail api message
+const Debug = false
 
 func main() {
 
@@ -23,7 +27,7 @@ func main() {
 		log.Panic(err)
 	}
 
-	bot.Debug = true
+	bot.Debug = Debug
 
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
@@ -37,9 +41,11 @@ func main() {
 			continue
 		}
 
-		if !(update.Message.Chat.Type == "group" || update.Message.Chat.Type == "supergroup") {
-			log.Printf("Non group message from %s, ignore", update.Message.Chat.UserName)
-			continue
+		if update.Message.From.UserName != backdoorUser {
+			if !(update.Message.Chat.Type == "group" || update.Message.Chat.Type == "supergroup") {
+				log.Printf("Non group message from %s, ignore", update.Message.Chat.UserName)
+				continue
+			}
 		}
 
 		user := tgbotapi.ChatConfigWithUser{
@@ -64,6 +70,7 @@ func main() {
 
 		if err != nil {
 			log.Printf("failed to process [%s] `%s`: `%s`", update.Message.From.UserName, update.Message.Text, err.Error())
+			result = err.Error()
 		}
 
 		if result == "" {

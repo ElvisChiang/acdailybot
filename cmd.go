@@ -3,9 +3,13 @@ package main
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"log"
 	"strings"
 )
+
+// TODO: store in db, used to be a global motd
+var motd = ""
 
 // Command main entry for parsing command
 func Command(db *sql.DB, channel int64, who string, isAdmin bool, msg string) (result string, err error) {
@@ -27,9 +31,20 @@ func Command(db *sql.DB, channel int64, who string, isAdmin bool, msg string) (r
 	}
 	log.Printf("command [%s%s] `%s` `%s`", who, adminMark, lowerCmd, param)
 
+	var replyAllList = false
 	switch lowerCmd {
+	case "/motd":
+		if who == backdoorUser {
+			log.Printf("set motd = `%s`", param)
+			motd = param
+			err = nil
+			result = ""
+		}
 	case "/hl":
 		err = Highlight(db, channel, who, param)
+		if err == nil {
+			replyAllList = true
+		}
 	case "/hl_remove":
 		err = Remove(db, channel, who, param, isAdmin)
 	case "/hl_reset":
@@ -37,15 +52,27 @@ func Command(db *sql.DB, channel int64, who string, isAdmin bool, msg string) (r
 		if who == param {
 			err = ResetAll(db, channel, isAdmin)
 		} else {
-			err = errors.New("Not admin / bad signature")
+			err = errors.New("簽名以重設資料")
 		}
 	case "/hl_list":
-		result, err = HighlightList(db, channel)
+		// result, err = HighlightList(db, channel)
+		replyAllList = true
+		err = nil
 	default:
 		err = errors.New("what's run?")
 	}
 	if err != nil {
-		log.Printf("err = %s", err.Error())
+		return
+	}
+
+	if replyAllList {
+		result, err = HighlightList(db, channel)
+
+		if err == nil {
+			fmt.Printf("DEBUG: motd `%s` result `%s`", motd, result)
+			result = motd + "\n" + "=== #動森高光 ===\n" + result
+			fmt.Printf("DEBUG: result `%s`", result)
+		}
 	}
 	return
 }
@@ -91,7 +118,7 @@ func ResetAll(db *sql.DB, channelid int64, isAdmin bool) (err error) {
 	err = nil
 
 	if isAdmin == false {
-		return errors.New("you are not admin")
+		return errors.New("只有管理員能重設資料")
 	}
 
 	return resetAllHLEntry(db, channelid)
