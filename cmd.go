@@ -71,7 +71,7 @@ func Command(db *sql.DB, channel int64, who string, isAdmin bool, msg string) (r
 		if err == nil {
 			fmt.Printf("DEBUG: motd `%s` result `%s`", motd, result)
 			result = motd + "\n" + "=== #動森高光 ===\n" + result
-			fmt.Printf("DEBUG: result `%s`", result)
+			fmt.Printf("DEBUG: result `%s`\n", result)
 		}
 	}
 	return

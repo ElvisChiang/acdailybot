@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -60,11 +61,15 @@ func main() {
 		if talker.IsAdministrator() || talker.IsCreator() {
 			adminMark = "*"
 		}
-		log.Printf("[%d/%s%s] %s",
+		log.Printf("[%d/%s%s] `%s`",
 			update.Message.Chat.ID,
 			update.Message.From.UserName,
 			adminMark,
 			update.Message.Text)
+
+		if len(strings.TrimSpace(update.Message.Text)) == 0 {
+			continue
+		}
 
 		result, err := Command(db, update.Message.Chat.ID, update.Message.From.UserName, talker.IsAdministrator() || talker.IsCreator(), update.Message.Text)
 
