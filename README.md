@@ -17,7 +17,7 @@ Animal Crossing Daily Bot
 - ```/hl_reset <admin_id>```
     - Reset all data in this channel
     - only admin can do this
-    - sign admin_id for not accidently delete data
+    - sign admin_id for not accidently deleting data
 
 - ```/hl_list```
     - list currently hightlight

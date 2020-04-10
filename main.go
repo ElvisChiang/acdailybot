@@ -6,8 +6,19 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
+// should only for debug
+const resetDBAtStartup = false
+
 func main() {
-	bot, err := tgbotapi.NewBotAPI("TOKEN")
+
+	db, err := initDB(resetDBAtStartup)
+
+	if err != nil {
+		log.Panic(err)
+	}
+	defer db.Close()
+
+	bot, err := tgbotapi.NewBotAPI(apiToken)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -26,17 +37,42 @@ func main() {
 			continue
 		}
 
-		err = Command(update.Message.From.UserName, update.Message.Text)
-
-		if err != nil {
-			log.Printf("failed to process [%s] %s", update.Message.From.UserName, update.Message.Text)
+		if update.Message.Chat.Type != "group" {
+			log.Printf("Non group message from %s, ignore", update.Message.Chat.UserName)
+			continue
 		}
 
-		log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+		user := tgbotapi.ChatConfigWithUser{
+			ChatID:             update.Message.Chat.ID,
+			SuperGroupUsername: update.Message.Chat.UserName,
+			UserID:             update.Message.From.ID,
+		}
+
+		talker, err := bot.GetChatMember(user)
+
+		adminMark := ""
+		if talker.IsAdministrator() || talker.IsCreator() {
+			adminMark = "*"
+		}
+		log.Printf("[%d/%s%s] %s",
+			update.Message.Chat.ID,
+			update.Message.From.UserName,
+			adminMark,
+			update.Message.Text)
+
+		result, err := Command(db, update.Message.Chat.ID, update.Message.From.UserName, talker.IsAdministrator(), update.Message.Text)
+
+		if err != nil {
+			log.Printf("failed to process [%s] `%s`: `%s`", update.Message.From.UserName, update.Message.Text, err.Error())
+		}
+
+		if result == "" {
+			return
+		}
 
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+		msg.ParseMode = "Markdown"
 		msg.ReplyToMessageID = update.Message.MessageID
-
 		bot.Send(msg)
 	}
 }
