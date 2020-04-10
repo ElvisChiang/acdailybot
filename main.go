@@ -37,7 +37,7 @@ func main() {
 			continue
 		}
 
-		if update.Message.Chat.Type != "group" {
+		if !(update.Message.Chat.Type == "group" || update.Message.Chat.Type == "supergroup") {
 			log.Printf("Non group message from %s, ignore", update.Message.Chat.UserName)
 			continue
 		}
