@@ -61,6 +61,7 @@ func Command(db *sql.DB, channel int64, who string, isAdmin bool, msg string) (r
 	default:
 		// err = errors.New("what's run?")
 		log.Printf("receive unknown message: %s", msg)
+		err = nil
 		return
 	}
 	if err != nil {
