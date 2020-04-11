@@ -72,6 +72,15 @@ func main() {
 		}
 
 		username := update.Message.From.UserName
+		if len(username) == 0 {
+			username = update.Message.From.FirstName
+		}
+		if len(username) == 0 {
+			username = update.Message.From.LastName
+		}
+		if len(username) == 0 {
+			continue
+		}
 		result, err := Command(db, update.Message.Chat.ID, username, talker.IsAdministrator() || talker.IsCreator(), update.Message.Text)
 
 		if err != nil {
