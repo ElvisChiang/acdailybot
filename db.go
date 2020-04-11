@@ -140,7 +140,7 @@ func queryAllHLEntry(db *sql.DB, channelid int64) (message string, err error) {
 			log.Printf(err.Error())
 			continue
 		}
-		message = fmt.Sprintf("%s%s: %s\n", message, name, msg)
+		message = fmt.Sprintf("%s```%s:```\t%s \n", message, name, msg)
 		fmt.Println(name, msg)
 	}
 	err = rows.Err()

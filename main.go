@@ -71,7 +71,8 @@ func main() {
 			continue
 		}
 
-		result, err := Command(db, update.Message.Chat.ID, update.Message.From.UserName, talker.IsAdministrator() || talker.IsCreator(), update.Message.Text)
+		username := update.Message.From.UserName
+		result, err := Command(db, update.Message.Chat.ID, username, talker.IsAdministrator() || talker.IsCreator(), update.Message.Text)
 
 		if err != nil {
 			log.Printf("failed to process [%s] `%s`: `%s`", update.Message.From.UserName, update.Message.Text, err.Error())
