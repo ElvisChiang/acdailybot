@@ -42,12 +42,10 @@ func main() {
 			continue
 		}
 
-		if update.Message.From.UserName != backdoorUser {
 			if !(update.Message.Chat.Type == "group" || update.Message.Chat.Type == "supergroup") {
 				log.Printf("Non group message from %s, ignore", update.Message.Chat.UserName)
 				continue
 			}
-		}
 
 		user := tgbotapi.ChatConfigWithUser{
 			ChatID:             update.Message.Chat.ID,
