@@ -40,7 +40,7 @@ func Command(db *sql.DB, channel int64, who string, isAdmin bool, msg string) (r
 			err = nil
 			result = ""
 		}
-	case "/hl":
+	case "/hl", "/hi":
 		err = Highlight(db, channel, who, param)
 		if err == nil {
 			replyAllList = true
