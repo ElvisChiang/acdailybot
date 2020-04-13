@@ -147,7 +147,13 @@ func queryAllTurnipEntry(db *sql.DB, channelid int64) (message string, err error
 		)
 		fmt.Println(name, msg)
 	}
-	message = strings.ReplaceAll(message, ",0", "")
+	for true {
+		newMsg := strings.ReplaceAll(message, ",0 ", " ")
+		if newMsg == message {
+			break
+		}
+		message = newMsg
+	}
 
 	fmt.Printf("DBUG:\n%s\n", message)
 	err = rows.Err()
