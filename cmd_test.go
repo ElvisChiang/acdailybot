@@ -114,7 +114,7 @@ func TestRemove(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := Remove(db, channelID, tt.args.who, tt.args.user, tt.args.isAdmin); (err != nil) != tt.wantErr {
+			if err := Remove(db, channelID, tt.args.who, tt.args.user, tt.args.isAdmin, false); (err != nil) != tt.wantErr {
 				t.Errorf("Remove() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -177,7 +177,137 @@ func TestResetAll(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := ResetAll(db, channelID, tt.args.isAdmin); (err != nil) != tt.wantErr {
+			if err := ResetAll(db, channelID, tt.args.isAdmin, false); (err != nil) != tt.wantErr {
+				t.Errorf("ResetAll() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+// --- Turnip ---
+
+func TestTurnip(t *testing.T) {
+	type args struct {
+		who string
+		msg string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"add1", args{"useraaa", "buy 101"}, true},
+		{"add2", args{"userbbb", "buy 102 sell"}, false},
+		{"add2+", args{"userbbb", "buy102sell"}, false},
+		{"add3", args{"userccc", "buy 103 sell   "}, false},
+		{"add4", args{"userddd", "buy 104 sell 101, 102,103, 104"}, false},
+		{"add5", args{"userddd", "buy 105 sell 101, 102,103, 104"}, false}, // override last one
+		{"add6", args{"user666", "buy sell 101, 102,103, 104"}, true},
+		{"add7", args{"user777", "buy 102 sell 636, -,103, 104"}, false},
+		{"add7+", args{"user777", "buy 102 sell 636, *,103, 104"}, true},
+		{"add8", args{"user888", "buy 102 sell 637, 102,103, 104"}, true}, // over max
+	}
+	channelID := int64(-436800666)
+	db, err := initDB(false)
+
+	if err != nil {
+		log.Panic(err)
+	}
+	defer db.Close()
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// TODO
+			if err := Turnip(db, channelID, tt.args.who, tt.args.msg); (err != nil) != tt.wantErr {
+				t.Errorf("Turnip() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestRemoveTurnip(t *testing.T) {
+	type args struct {
+		who     string
+		user    string
+		isAdmin bool
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"non admin useraaa remove bbb", args{"useraaa", "userbbb", false}, true},
+		{"admin useraaa remove bbb", args{"useraaa", "userbbb", true}, false},
+		{"userbbb remove bbb", args{"userbbb", "", false}, false},
+		{"userccc remove ccc", args{"userccc", "", false}, false},
+		{"admin userccc remove ddd", args{"userddd", "", true}, false},
+	}
+	channelID := int64(-436800666)
+	db, err := initDB(false)
+
+	if err != nil {
+		log.Panic(err)
+	}
+	defer db.Close()
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := Remove(db, channelID, tt.args.who, tt.args.user, tt.args.isAdmin, true); (err != nil) != tt.wantErr {
+				t.Errorf("Remove() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestTurnipList(t *testing.T) {
+	tests := []struct {
+		name    string
+		wantErr bool
+	}{
+		{"/turnip_list", false},
+	}
+	channelID := int64(-436800666)
+	db, err := initDB(false)
+
+	if err != nil {
+		log.Panic(err)
+	}
+	defer db.Close()
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := TurnipList(db, channelID)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("TurnipList() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+		})
+	}
+}
+
+func TestResetTurnipAll(t *testing.T) {
+	type args struct {
+		isAdmin bool
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"reset non admin", args{false}, true},
+		{"reset by admin", args{true}, false},
+	}
+	channelID := int64(-436800666)
+	db, err := initDB(false)
+
+	if err != nil {
+		log.Panic(err)
+	}
+	defer db.Close()
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := ResetAll(db, channelID, tt.args.isAdmin, true); (err != nil) != tt.wantErr {
 				t.Errorf("ResetAll() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

@@ -21,8 +21,20 @@ func resetDB() (err error) {
 	template := `
 	create table %s (id integer not null primary key, channelid integer, name text, message text);
 	delete from %s;
+	create table %s (id integer not null primary key, channelid integer, name text, buy integer,
+		sell1_am integer, sell1_pm integer,
+		sell2_am integer, sell2_pm integer,
+		sell3_am integer, sell3_pm integer,
+		sell4_am integer, sell4_pm integer,
+		sell5_am integer, sell5_pm integer,
+		sell6_am integer, sell6_pm integer
+		);
+	delete from %s;
 	`
-	sqlStmt := fmt.Sprintf(template, getDBTableName(), getDBTableName())
+	sqlStmt := fmt.Sprintf(template,
+		getDBTableName(), getDBTableName(),
+		getTurnipDBTableName(), getTurnipDBTableName(),
+	)
 
 	_, err = db.Exec(sqlStmt)
 	if err != nil {
@@ -63,9 +75,9 @@ func removeHLEntry(db *sql.DB, channelid int64, who string) (err error) {
 	err = nil
 
 	template := `
-	DELETE from highlight where channelid = %d and name = "%s";
+	DELETE from %s where channelid = %d and name = "%s";
 	`
-	sqlStmt := fmt.Sprintf(template, channelid, who)
+	sqlStmt := fmt.Sprintf(template, getDBTableName(), channelid, who)
 
 	_, err = db.Exec(sqlStmt)
 	if err != nil {
@@ -80,9 +92,9 @@ func insertHLEntry(db *sql.DB, channelid int64, who string, message string) (err
 	err = nil
 
 	template := `
-	INSERT INTO highlight(channelid, name, message) VALUES (%d, "%s", "%s");
+	INSERT INTO %s(channelid, name, message) VALUES (%d, "%s", "%s");
 	`
-	sqlStmt := fmt.Sprintf(template, channelid, who, message)
+	sqlStmt := fmt.Sprintf(template, getDBTableName(), channelid, who, message)
 
 	_, err = db.Exec(sqlStmt)
 	if err != nil {
@@ -122,9 +134,9 @@ func queryAllHLEntry(db *sql.DB, channelid int64) (message string, err error) {
 	message = ""
 
 	template := `
-	SELECT name, message from highlight where channelid = %d
+	SELECT name, message from %s where channelid = %d
 	`
-	sqlStmt := fmt.Sprintf(template, channelid)
+	sqlStmt := fmt.Sprintf(template, getDBTableName(), channelid)
 
 	rows, err := db.Query(sqlStmt)
 	if err != nil {

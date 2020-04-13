@@ -7,3 +7,16 @@ func getDBFilename() string {
 func getDBTableName() string {
 	return "highlight"
 }
+
+func getTurnipDBTableName() string {
+	return "turnip"
+}
+
+// Price for turnip
+type Price struct {
+	buy  int
+	sell [12]int
+}
+
+// MaxOfTurnip presents a reasonable price maximum
+const MaxOfTurnip = 636
