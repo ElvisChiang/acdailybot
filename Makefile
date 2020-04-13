@@ -15,3 +15,4 @@ clean:
 
 dump:
 	@echo ".dump highlight" | sqlite3 acbot.db
+	@echo ".dump turnip" | sqlite3 acbot.db
