@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -134,7 +135,7 @@ func queryAllTurnipEntry(db *sql.DB, channelid int64) (message string, err error
 			price.sell[8], price.sell[9],
 			price.sell[10], price.sell[11],
 		)
-		message = fmt.Sprintf("%s```%s:``` buy %d sell %d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d %s\n",
+		message = fmt.Sprintf("%s```%s:``` 買 %d 賣 %d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d %s\n",
 			message, name, price.buy,
 			price.sell[0], price.sell[1],
 			price.sell[2], price.sell[3],
@@ -146,6 +147,7 @@ func queryAllTurnipEntry(db *sql.DB, channelid int64) (message string, err error
 		)
 		fmt.Println(name, msg)
 	}
+	message = strings.ReplaceAll(message, ",0", "")
 
 	fmt.Printf("DBUG:\n%s\n", message)
 	err = rows.Err()

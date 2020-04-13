@@ -19,6 +19,8 @@ func Command(db *sql.DB, channel int64, who string, isAdmin bool, msg string) (r
 	result = ""
 
 	msg2 := strings.ReplaceAll(msg, "@ac_dailybot", "")
+	msg2 = strings.ReplaceAll(msg2, "@testturnipbot", "")
+
 	cmdstring := strings.Fields(msg2)
 	if len(cmdstring) == 0 { // should be never happen
 		err = nil
