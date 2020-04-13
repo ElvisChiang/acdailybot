@@ -87,7 +87,8 @@ func main() {
 		}
 
 		if result == "" {
-			result = "ok"
+			// result = "ok"
+			continue
 		}
 
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, result)
