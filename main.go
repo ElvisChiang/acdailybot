@@ -11,9 +11,6 @@ import (
 const resetDBAtStartup = false
 const backdoorUser = "elvisfb"
 
-// Debug for detail api message
-const Debug = false
-
 func main() {
 
 	db, err := initDB(resetDBAtStartup)

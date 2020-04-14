@@ -19,4 +19,7 @@ type Price struct {
 }
 
 // MaxOfTurnip presents a reasonable price maximum
-const MaxOfTurnip = 636
+const MaxOfTurnip = 660
+
+// Debug for detail api message
+const Debug = false
