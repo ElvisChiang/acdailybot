@@ -11,7 +11,18 @@ import (
 const resetDBAtStartup = false
 const backdoorUser = "elvisfb"
 
+var lastHLMsg map[int64]int
+var lastTurnipMsg map[int64]int
+
+const typeMessageHighlight = 1
+const typeMessageTurnip = 2
+
+var sendMessageType = 0
+
 func main() {
+
+	lastHLMsg = make(map[int64]int)
+	lastTurnipMsg = make(map[int64]int)
 
 	db, err := initDB(resetDBAtStartup)
 
@@ -92,6 +103,20 @@ func main() {
 		msg.ParseMode = "Markdown"
 		msg.DisableWebPagePreview = true
 		msg.ReplyToMessageID = update.Message.MessageID
-		bot.Send(msg)
+		ret, err := bot.Send(msg)
+
+		if err == nil {
+			var lastMsg = lastHLMsg
+			if sendMessageType == 0 {
+				continue
+			} else if sendMessageType == typeMessageTurnip {
+				lastMsg = lastTurnipMsg
+			}
+			log.Printf("messageID %d -> %d in chat %d\n", ret.MessageID, lastMsg[ret.Chat.ID], ret.Chat.ID)
+			if lastMsg[ret.Chat.ID] != 0 {
+				bot.DeleteMessage(tgbotapi.DeleteMessageConfig{ChatID: ret.Chat.ID, MessageID: lastMsg[ret.Chat.ID]})
+			}
+			lastMsg[ret.Chat.ID] = ret.MessageID
+		}
 	}
 }

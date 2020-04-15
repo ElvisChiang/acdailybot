@@ -37,6 +37,7 @@ func Command(db *sql.DB, channel int64, who string, isAdmin bool, msg string) (r
 
 	var replyAllList = false
 	var replyAllTurnipList = false
+	sendMessageType = 0
 	switch lowerCmd {
 	case "/motd":
 		if who == backdoorUser {
@@ -96,6 +97,7 @@ func Command(db *sql.DB, channel int64, who string, isAdmin bool, msg string) (r
 			fmt.Printf("DEBUG: motd `%s` result `%s`", motd, result)
 			result = motd + "\n" + "=== #動森高光 ===\n" + result
 		}
+		sendMessageType = typeMessageHighlight
 		return
 	}
 	if replyAllTurnipList {
@@ -105,6 +107,7 @@ func Command(db *sql.DB, channel int64, who string, isAdmin bool, msg string) (r
 			fmt.Printf("DEBUG: motd `%s` result `%s`", motd, result)
 			result = motd + "\n" + "=== #動森大頭菜 ===\n" + result
 		}
+		sendMessageType = typeMessageTurnip
 		return
 	}
 
