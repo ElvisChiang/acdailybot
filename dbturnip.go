@@ -72,7 +72,7 @@ func insertTurnipEntry(db *sql.DB, channelid int64, who string, price *Price) (e
 func queryTurnipEntry(db *sql.DB, channelid int64, who string) (message string, err error) {
 	err = nil
 	message = ""
-	// TOOD: query turnip entry in db
+	// TODO: query turnip entry in db
 
 	return
 }

@@ -30,7 +30,7 @@ func TestCommand(t *testing.T) {
 		{"/hl_remove ok", args{123, "username", true, "/hl_remove username"}, false},
 
 		{"/hl_reset", args{123, "username", false, "/hl_reset"}, true},
-		{"/hl_reset emtpy", args{123, "username", false, "/hl_reset "}, true},
+		{"/hl_reset empty", args{123, "username", false, "/hl_reset "}, true},
 		{"/hl_reset wrong name", args{123, "username", false, "/hl_reset not_same"}, true},
 		{"/hl_reset non admin", args{123, "username", false, "/hl_reset username"}, true},
 		{"/hl_reset ok", args{123, "username", true, "/hl_reset username"}, false},
@@ -146,14 +146,6 @@ func TestHighlightList(t *testing.T) {
 		})
 	}
 }
-
-/*
-	{"/hl_reset", args{123, "username", false, "/hl_remove"}, true},
-	{"/hl_reset emtpy", args{123, "username", false, "/hl_remove "}, true},
-	{"/hl_reset wrong name", args{123, "username", false, "/hl_remove not_same"}, true},
-	{"/hl_reset non admin", args{123, "username", false, "/hl_remove username"}, true},
-	{"/hl_reset ok", args{123, "username", true, "/hl_remove username"}, false},
-*/
 
 func TestResetAll(t *testing.T) {
 	type args struct {

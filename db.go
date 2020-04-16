@@ -118,7 +118,7 @@ func insertHLEntry(db *sql.DB, channelid int64, who string, message string) (err
 func queryHLEntry(db *sql.DB, channelid int64, who string) (message string, err error) {
 	err = nil
 	message = ""
-	// TOOD: query entry in db
+	// TODO: query entry in db
 
 	return
 }
