@@ -75,11 +75,16 @@ func removeHLEntry(db *sql.DB, channelid int64, who string) (err error) {
 	err = nil
 
 	template := `
-	DELETE from %s where channelid = %d and name = "%s";
+	DELETE from %s where channelid = %d and name = ?;
 	`
-	sqlStmt := fmt.Sprintf(template, getDBTableName(), channelid, who)
+	sqlStmt := fmt.Sprintf(template, getDBTableName(), channelid)
 
-	_, err = db.Exec(sqlStmt)
+	stmt, err := db.Prepare(sqlStmt)
+	if err != nil {
+		log.Printf("%q: %s\n", err, sqlStmt)
+		return
+	}
+	_, err = stmt.Exec(who)
 	if err != nil {
 		log.Printf("%q: %s\n", err, sqlStmt)
 		return
@@ -92,11 +97,16 @@ func insertHLEntry(db *sql.DB, channelid int64, who string, message string) (err
 	err = nil
 
 	template := `
-	INSERT INTO %s(channelid, name, message) VALUES (%d, "%s", "%s");
+	INSERT INTO %s(channelid, name, message) VALUES (?, ?, ?);
 	`
-	sqlStmt := fmt.Sprintf(template, getDBTableName(), channelid, who, message)
-
-	_, err = db.Exec(sqlStmt)
+	sqlStmt := fmt.Sprintf(template, getDBTableName())
+	stmt, err := db.Prepare(sqlStmt)
+	defer stmt.Close()
+	if err != nil {
+		log.Printf("%q: %s\n", err, sqlStmt)
+		return
+	}
+	_, err = stmt.Exec(channelid, who, message)
 	if err != nil {
 		log.Printf("%q: %s\n", err, sqlStmt)
 		return
