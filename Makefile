@@ -16,3 +16,10 @@ clean:
 dump:
 	@echo ".dump highlight" | sqlite3 acbot.db
 	@echo ".dump turnip" | sqlite3 acbot.db
+
+# Example for reset db
+# record it in crontab
+resethl:
+	@echo "delete from highlight where channelid = -436800666" | sqlite3 acbot.db
+resetturnip:
+	@echo "delete from turnip where channelid = -436800666" | sqlite3 acbot.db
