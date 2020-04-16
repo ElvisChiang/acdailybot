@@ -13,12 +13,13 @@ run:
 clean:
 	@rm -f acdailybot
 
+# while sleep 300 ; do make dump ; done
 dump:
-	@echo ".dump highlight" | sqlite3 acbot.db
-	@echo ".dump turnip" | sqlite3 acbot.db
+	@mkdir -p backup
+	@echo ".dump highlight" | sqlite3 acbot.db | tee backup/highlight_`date "+%Y%m%d-%H_%M_%S"`.sql
+	@echo ".dump turnip" | sqlite3 acbot.db | tee backup/turnip_`date "+%Y%m%d-%H_%M_%S"`.sql
 
 # Example for reset db
-# record it in crontab
 resethl:
 	@echo "delete from highlight where channelid = -436800666" | sqlite3 acbot.db
 resetturnip:
