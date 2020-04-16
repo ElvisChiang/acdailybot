@@ -4,10 +4,20 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"time"
 	"os"
 
 	_ "github.com/mattn/go-sqlite3"
 )
+
+func getCurrentDate() string {
+	zone, _ := time.LoadLocation(timezone)
+	if time.Now().Hour() > 5 {
+		return time.Now().In(zone).Format("20060102")
+	}else{
+		return time.Now().AddDate(0,0,-1).In(zone).Format("20060102")
+	}
+}
 
 func resetDB() (err error) {
 	err = nil
@@ -19,7 +29,7 @@ func resetDB() (err error) {
 	}
 	defer db.Close()
 	template := `
-	create table %s (id integer not null primary key, channelid integer, name text, message text);
+	create table %s (id integer not null primary key, channelid integer, name text, message text, date text);
 	delete from %s;
 	create table %s (id integer not null primary key, channelid integer, name text, buy integer,
 		sell1_am integer, sell1_pm integer,
@@ -75,13 +85,13 @@ func removeHLEntry(db *sql.DB, channelid int64, who string) (err error) {
 	err = nil
 
 	template := `
-	DELETE from %s where channelid = %d and name = "%s";
+	DELETE from %s where channelid = ? and name = ? and date = ?;
 	`
-	sqlStmt := fmt.Sprintf(template, getDBTableName(), channelid, who)
+	stmt, _ := db.Prepare(fmt.Sprintf(template, getDBTableName()))
 
-	_, err = db.Exec(sqlStmt)
+	_, err = stmt.Exec(channelid, who, getCurrentDate())
 	if err != nil {
-		log.Printf("%q: %s\n", err, sqlStmt)
+		log.Printf("%q: %s\n", err, template)
 		return
 	}
 
@@ -92,13 +102,12 @@ func insertHLEntry(db *sql.DB, channelid int64, who string, message string) (err
 	err = nil
 
 	template := `
-	INSERT INTO %s(channelid, name, message) VALUES (%d, "%s", "%s");
+	INSERT INTO %s(channelid, name, message, date) VALUES (?, ?, ?, ?);
 	`
-	sqlStmt := fmt.Sprintf(template, getDBTableName(), channelid, who, message)
-
-	_, err = db.Exec(sqlStmt)
+	stmt, _ := db.Prepare(fmt.Sprintf(template, getDBTableName()))
+	_, err = stmt.Exec(channelid, who, message, getCurrentDate())
 	if err != nil {
-		log.Printf("%q: %s\n", err, sqlStmt)
+		log.Printf("%q: %s\n", err, template)
 		return
 	}
 
@@ -134,11 +143,11 @@ func queryAllHLEntry(db *sql.DB, channelid int64) (message string, err error) {
 	message = ""
 
 	template := `
-	SELECT name, message from %s where channelid = %d
+	SELECT name, message from %s where channelid = ? and date = ?
 	`
-	sqlStmt := fmt.Sprintf(template, getDBTableName(), channelid)
+	sqlStmt := fmt.Sprintf(template, getDBTableName())
 
-	rows, err := db.Query(sqlStmt)
+	rows, err := db.Query(sqlStmt, channelid, getCurrentDate())
 	if err != nil {
 		log.Printf("%q: %s\n", err, sqlStmt)
 		return

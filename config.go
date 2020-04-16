@@ -23,3 +23,4 @@ const MaxOfTurnip = 660
 
 // Debug for detail api message
 const Debug = false
+const timezone = "Taipei/Asia"
