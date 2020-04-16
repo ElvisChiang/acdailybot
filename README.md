@@ -1,6 +1,7 @@
 # acdailybot
 Animal Crossing Daily Bot
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/ElvisChiang/acdailybot)](https://goreportcard.com/report/github.com/ElvisChiang/acdailybot)
 
 ## Usage:
 
